@@ -1116,6 +1116,19 @@ x_res_hero = -100
 y_res_hero = 650
 enemy_attack_check = True
 camera.update(ass.rect.center[0] - 20, ass.rect.center[1] - 500)
+x_res_enemy -= ass.rect.center[0] - 20
+y_res_enemy -= ass.rect.center[1] - 500
+shell_en_x -= ass.rect.center[0] - 20
+shell_en_y -= ass.rect.center[1] - 500
+x_res_hero -= ass.rect.center[0] - 20
+y_res_hero -= ass.rect.center[1] - 500
+map(lambda x: x - 3, all_team_crips_x)
+map(lambda x: x - 3, all_en_crips_x)
+crip_x -= ass.rect.center[0] - 20
+crip_en_x -= ass.rect.center[0] - 20
+crip_y -= ass.rect.center[1] - 500
+x_hp -= ass.rect.center[0] - 20
+x_hp_hero -= ass.rect.center[0] - 20
 for sprite in dragon:
     camera.apply(sprite)
 screen.fill(0)
