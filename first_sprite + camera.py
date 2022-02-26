@@ -145,7 +145,7 @@ def game_setting():
     image = pygame.transform.scale(image, (image.get_rect().w * 3,
                                            image.get_rect().h * 3))
     choose_knight = pygame.sprite.Group(
-        AnimatedSprite_2(image, 8, 1, -220, 20))
+        AnimatedSprite_2(image, 8, 1, -200, 20))
 
     image = pygame.image.load('data/mon_stay.png').convert_alpha()
     image = pygame.transform.scale(image, (image.get_rect().w * 3,
