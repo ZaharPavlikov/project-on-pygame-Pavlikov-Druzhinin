@@ -1550,7 +1550,6 @@ while running:
         clock.tick(t)
 
     if i_hp < count:
-        print(111111)
         HP.update()
         x_hp -= 7
         i_hp += 1
