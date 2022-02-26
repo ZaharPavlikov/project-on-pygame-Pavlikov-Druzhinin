@@ -238,6 +238,7 @@ class Camera:
     def update(self, delta_x, delta_y):
         self.dx = 0
         self.dy = 0
+        print(self.dx - delta_x, self.dy - delta_y)
         self.dx -= delta_x
         self.dy -= delta_y
 
@@ -1114,6 +1115,13 @@ y_res_enemy = 650
 x_res_hero = -100
 y_res_hero = 650
 enemy_attack_check = True
+camera.update(ass.rect.center[0] - 20, ass.rect.center[1] - 500)
+for sprite in dragon:
+    camera.apply(sprite)
+screen.fill(0)
+dragon.draw(screen)
+pygame.display.update()
+clock.tick(60)
 while running:
     x = pygame.mouse.get_pos()[0]
     y = pygame.mouse.get_pos()[1]
