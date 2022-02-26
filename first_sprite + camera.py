@@ -11,6 +11,9 @@ screen = pygame.display.set_mode(size)
 hero_mega_val = 4
 pygame.display.set_caption("DOTA")
 
+cursor = pygame.image.load('data/cursor.png').convert_alpha()
+pygame.mouse.set_cursor((4, 4), cursor)
+
 pygame.mixer.music.load('data/music.mp3')
 pygame.mixer.music.play(-1)
 
@@ -142,7 +145,7 @@ def game_setting():
     image = pygame.transform.scale(image, (image.get_rect().w * 3,
                                            image.get_rect().h * 3))
     choose_knight = pygame.sprite.Group(
-        AnimatedSprite_2(image, 8, 1, -230, 20))
+        AnimatedSprite_2(image, 8, 1, -220, 20))
 
     image = pygame.image.load('data/mon_stay.png').convert_alpha()
     image = pygame.transform.scale(image, (image.get_rect().w * 3,
@@ -156,7 +159,7 @@ def game_setting():
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if monk_rect.collidepoint(event.pos):
                     button_sound2.play()
