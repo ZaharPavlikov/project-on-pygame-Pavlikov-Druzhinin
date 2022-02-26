@@ -14,8 +14,8 @@ pygame.display.set_caption("DOTA")
 pygame.mixer.music.load('data/music.mp3')
 pygame.mixer.music.play(-1)
 
-button_sound1 = pygame.mixer.Sound('data/click1.mp3')
-button_sound2 = pygame.mixer.Sound('data/click.mp3')
+button_sound1 = pygame.mixer.Sound('data/click1.wav')
+button_sound2 = pygame.mixer.Sound('data/click.wav')
 
 with sqlite3.connect('database.db') as con:
     wins, losses, kills, deaths = con.execute(
@@ -72,7 +72,7 @@ def init(wins, losses, kills, deaths):
 
 
 def game_setting():
-    global hero_mega_val
+    global hero_mega_val, enemy_attack_m, enemy_attack_r, enemy_attack_w, enemy_attack_1
     screen.fill('gray12')
     pygame.draw.line(screen, 'white', (450, 0), (450, 460))
     pygame.draw.line(screen, 'white', (0, 75), (900, 75))
@@ -176,8 +176,16 @@ def game_setting():
                     hero_mega_val = 4
                 elif map_1.collidepoint(event.pos):
                     button_sound2.play()
+                    enemy_attack_m = 100
+                    enemy_attack_r = 150
+                    enemy_attack_w = 100
+                    enemy_attack_1 = 75
                 elif map_2.collidepoint(event.pos):
                     button_sound2.play()
+                    enemy_attack_m = 150
+                    enemy_attack_r = 200
+                    enemy_attack_w = 125
+                    enemy_attack_1 = 100
                 elif start_button.collidepoint(event.pos):
                     running = False
 
@@ -1124,10 +1132,6 @@ hero_attack_w = 50
 hero_attack_r = 200
 hp_hero_die = 2000
 hp_hero_now = hp_die
-enemy_attack_m = 100
-enemy_attack_r = 150
-enemy_attack_w = 100
-enemy_attack_1 = 75
 enemy_attack = False
 enemy_run = True
 hero_die = False
@@ -1818,7 +1822,7 @@ while running:
             else:
                 if not hero_die:
                     hp_hero_now -= enemy_attack_w
-                    count_hero_check += enemy_attack_w / (hp_hero_die // 10)
+                    count_hero_check += enemy_attack_1 / (hp_hero_die // 10)
                     count_hero = int(count_hero_check)
                     if count_hero > 10:
                         count_hero = 10
