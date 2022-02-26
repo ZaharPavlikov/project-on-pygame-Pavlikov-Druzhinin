@@ -216,6 +216,31 @@ init(wins, losses, kills, deaths)
 game_setting()   
 
 
+def win():
+    bg = pygame.image.load('data/you_win.png').convert()
+    rect = screen.get_rect().fit(bg.get_rect())
+    image = pygame.transform.smoothscale(bg.subsurface(rect), size, screen)
+
+    pygame.display.update()
+
+    while True:
+        event = pygame.event.wait()
+        if event.type == pygame.QUIT:
+            exit()
+
+
+def lose():
+    bg = pygame.image.load('data/game_over.png').convert()
+    rect = screen.get_rect().fit(bg.get_rect())
+    image = pygame.transform.smoothscale(bg.subsurface(rect), size, screen)
+
+    pygame.display.update()
+
+    while True:
+        event = pygame.event.wait()
+        if event.type == pygame.QUIT:
+            exit()
+            
 
 class Map(pygame.sprite.Sprite):
     mapa = pygame.image.load("data/bgr_fin.png").convert()
@@ -238,7 +263,6 @@ class Camera:
     def update(self, delta_x, delta_y):
         self.dx = 0
         self.dy = 0
-        print(self.dx - delta_x, self.dy - delta_y)
         self.dx -= delta_x
         self.dy -= delta_y
 
@@ -1013,7 +1037,7 @@ shell_en_x = 1100
 shell_en_y = 650
 all_team_crips_x = []
 all_en_crips_x = []
-tower_as_hp = 300
+tower_as_hp = 500
 tower_en_hp = 500
 dmg = []
 dmg_2 = []
@@ -1114,6 +1138,8 @@ x_res_enemy = 1350
 y_res_enemy = 650
 x_res_hero = -100
 y_res_hero = 650
+cam_max_x = 16
+cam_max_y = ass.rect.center[1] - 500
 enemy_attack_check = True
 camera.update(ass.rect.center[0] - 20, ass.rect.center[1] - 500)
 x_res_enemy -= ass.rect.center[0] - 20
@@ -1138,9 +1164,10 @@ clock.tick(60)
 while running:
     x = pygame.mouse.get_pos()[0]
     y = pygame.mouse.get_pos()[1]
-    if x > 890 and 10 < y < 589:
+    if x > 890 and 10 < y < 589 and cam_max_x + 3 < 586:
         camera.update(3, 0)
         x1 -= 3
+        cam_max_x += 3
         x_res_enemy -= 3
         x_res_hero -= 3
         shell_en_x -= 3
@@ -1157,8 +1184,9 @@ while running:
         dragon.draw(screen)
         pygame.display.update()
         clock.tick(60)
-    if y > 590 and 10 < x < 889:
+    if y > 590 and 10 < x < 889 and cam_max_y < 600:
         camera.update(0, 3)
+        cam_max_y += 3
         y1 -= 3
         y_res_enemy -= 3
         shell_en_y -= 3
@@ -1171,8 +1199,9 @@ while running:
         dragon.draw(screen)
         pygame.display.update()
         clock.tick(60)
-    if x < 10 and 10 < y < 589:
+    if x < 10 and 10 < y < 589 and cam_max_x - 3 > 0:
         camera.update(-3, 0)
+        cam_max_x -= 3
         x1 += 3
         x_hp += 3
         x_hp_hero += 3
@@ -1190,8 +1219,9 @@ while running:
         dragon.draw(screen)
         pygame.display.update()
         clock.tick(60)
-    if y < 10 and 10 < x < 889:
+    if y < 10 and 10 < x < 889 and cam_max_y > 100:
         camera.update(0, -3)
+        cam_max_y -= 3
         y1 += 3
         y_res_enemy += 3
         y_res_hero += 3
@@ -1308,19 +1338,16 @@ while running:
             stay = False
             check_attack_q = True
             draw = False
-            print(3)
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_w:
             x1, y1 = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
             stay = False
             draw = False
             W = True
-            print(1)
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
             x1, y1 = pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]
             stay = False
             draw = False
             R = True
-            print(2)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             x1, y1 = event.pos[0], event.pos[1]
             if enemy.rect.center[0] - 10 <= x1 <= enemy.rect.center[0] + 10 and enemy.rect.center[1] + 14 <= y1 <= enemy.rect.center[1] + 56:
@@ -1516,6 +1543,7 @@ while running:
         clock.tick(t)
 
     if i_hp < count:
+        print(111111)
         HP.update()
         x_hp -= 7
         i_hp += 1
@@ -1862,16 +1890,13 @@ while running:
         pygame.display.update()
         clock.tick(t)
     if tower_as_hp <= 0:
-        win = Win(dragon, (450, 300))
-        screen.fill(0)
-        dragon.draw(screen)
-        pygame.display.update()
-        clock.tick(t)
+        win()
         wins += 1
         with sqlite3.connect('database.db') as con:
             con.execute('UPDATE statistic SET wins = ?', (str(wins))).fetchall()
         running = False
     elif tower_en_hp <= 0:
+        lose()
         los = Lose(dragon, (450, 300))
         screen.fill(0)
         dragon.draw(screen)
