@@ -2,11 +2,13 @@ import pygame
 import random
 import sqlite3
 import time
+
+
 pygame.init()
 pygame.event.set_blocked(None)
 pygame.event.set_allowed((pygame.QUIT, pygame.MOUSEBUTTONDOWN, pygame.KEYDOWN))
 pygame.event.clear()
-size = w,h = 900, 600
+size = w, h = 900, 600
 screen = pygame.display.set_mode(size)
 hero_mega_val = 4
 pygame.display.set_caption("DOTA")
@@ -14,11 +16,11 @@ pygame.display.set_caption("DOTA")
 cursor = pygame.image.load('data/cursor.png').convert_alpha()
 pygame.mouse.set_cursor((4, 4), cursor)
 
-pygame.mixer.music.load('data/music.mp3')
+pygame.mixer.music.load('data/music/music.mp3')
 pygame.mixer.music.play(-1)
 
-button_sound1 = pygame.mixer.Sound('data/click1.wav')
-button_sound2 = pygame.mixer.Sound('data/click.wav')
+button_sound1 = pygame.mixer.Sound('data/music/click1.wav')
+button_sound2 = pygame.mixer.Sound('data/music/click.wav')
 
 with sqlite3.connect('database.db') as con:
     wins, losses, kills, deaths = con.execute(
@@ -26,6 +28,7 @@ with sqlite3.connect('database.db') as con:
 
 
 def init(wins, losses, kills, deaths):
+    '''Начальный экран при запуске'''
     bg = pygame.image.load('data/bg.jpeg').convert()
     rect = screen.get_rect().fit(bg.get_rect())
     image = pygame.transform.smoothscale(bg.subsurface(rect), size, screen)
@@ -75,6 +78,7 @@ def init(wins, losses, kills, deaths):
 
 
 def game_setting():
+    '''Экран настройки параметров будущей игры'''
     global hero_mega_val, enemy_attack_m, enemy_attack_r, enemy_attack_w, enemy_attack_1
     screen.fill('gray12')
     pygame.draw.line(screen, 'white', (450, 0), (450, 460))
@@ -145,17 +149,21 @@ def game_setting():
     image = pygame.transform.scale(image, (image.get_rect().w * 3,
                                            image.get_rect().h * 3))
     choose_knight = pygame.sprite.Group(
-        AnimatedSprite_2(image, 8, 1, -200, 20))
+        AnimatedSprite_2(image, 8, 1, -185, 20))
 
     image = pygame.image.load('data/mon_stay.png').convert_alpha()
     image = pygame.transform.scale(image, (image.get_rect().w * 3,
                                            image.get_rect().h * 3))
     choose_monk = pygame.sprite.Group(
-        AnimatedSprite_2(image, 6, 1, -300, -20))
+        AnimatedSprite_2(image, 6, 1, -320, -20))
 
     choose = choose_ass
     running = True
     clock = pygame.time.Clock()
+    enemy_attack_m = 100
+    enemy_attack_r = 150
+    enemy_attack_w = 100
+    enemy_attack_1 = 75
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -224,7 +232,7 @@ class AnimatedSprite_2(pygame.sprite.Sprite):
 
 init(wins, losses, kills, deaths)
 
-game_setting()   
+game_setting()
 
 
 def win():
@@ -251,25 +259,27 @@ def lose():
         event = pygame.event.wait()
         if event.type == pygame.QUIT:
             exit()
-            
+
 
 class Map(pygame.sprite.Sprite):
     mapa = pygame.image.load("data/bgr_fin.png").convert()
+
     def __init__(self, group):
         super().__init__(group)
         self.image = self.mapa
         self.rect = self.image.get_rect()
 
+
 class Camera:
     def __init__(self):
         self.dx = 0
         self.dy = 0
-        
+
     # сдвинуть объект obj на смещение камеры
     def apply(self, obj):
         obj.rect.x += self.dx
         obj.rect.y += self.dy
-    
+
     # позиционировать камеру на объекте target
     def update(self, delta_x, delta_y):
         self.dx = 0
@@ -347,11 +357,12 @@ class Shell(pygame.sprite.Sprite):
                 if count_hero > 10:
                     count_hero = 10
                 self.rect.x += 100000
-                
+
 
 class Crips(pygame.sprite.Sprite):
     sheet1 = pygame.image.load("data/Run.png")
     sheet2 = pygame.image.load("data/Attack.png")
+
     def __init__(self, group, x1, y1):
         super().__init__(group)
         self.sheet = self.sheet1
@@ -362,7 +373,7 @@ class Crips(pygame.sprite.Sprite):
         self.rect = self.rect.move(224, 112)
 
     def cut_sheet(self, sheet, columns, rows, x1, y1):
-        self.rect = pygame.Rect(x1, y1, sheet.get_width() // columns, 
+        self.rect = pygame.Rect(x1, y1, sheet.get_width() // columns,
                                 sheet.get_height() // rows)
         for j in range(rows):
             for i in range(columns):
@@ -384,7 +395,6 @@ class Crips(pygame.sprite.Sprite):
         if tower_enemy.rect.center[0] - self.rect.center[0] <= 50 and self.rect.x < 10000 and val != 3:
             val = 2
             tower_as_hp -= 1
-            print(tower_as_hp, tower_enemy.rect.center[0], self.rect.center[0])
         elif self.rect.center[0] > enemy.rect.center[0] and enemy.rect.collidepoint(self.rect.center[0] + 80, self.rect.center[1]):
             val = 2
             enemy_run = False
@@ -424,7 +434,7 @@ class Crips(pygame.sprite.Sprite):
                 dmg_2.append(0)
         if val != 3:
             all_team_crips_x.append(self.rect.center[0])
-            del all_team_crips_x [0]
+            del all_team_crips_x[0]
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
 
@@ -434,6 +444,7 @@ class Crips_en(pygame.sprite.Sprite):
     sheet1 = pygame.transform.flip(sheet1, 1, 0)
     sheet2 = pygame.image.load("data/Attack.png")
     sheet2 = pygame.transform.flip(sheet2, 1, 0)
+
     def __init__(self, group, x1, y1):
         super().__init__(group)
         self.sheet = self.sheet1
@@ -444,7 +455,7 @@ class Crips_en(pygame.sprite.Sprite):
         self.rect = self.rect.move(224, 112)
 
     def cut_sheet(self, sheet, columns, rows, x1, y1):
-        self.rect = pygame.Rect(x1, y1, sheet.get_width() // columns, 
+        self.rect = pygame.Rect(x1, y1, sheet.get_width() // columns,
                                 sheet.get_height() // rows)
         for j in range(rows):
             for i in range(columns):
@@ -496,10 +507,10 @@ class Crips_en(pygame.sprite.Sprite):
                 dmg.append(0)
         if val != 3:
             all_en_crips_x.append(self.rect.center[0])
-            del all_en_crips_x [0]
+            del all_en_crips_x[0]
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
-        
+
 
 class Enemy(pygame.sprite.Sprite):
     sheet1 = pygame.image.load("data/stay.png")
@@ -514,6 +525,7 @@ class Enemy(pygame.sprite.Sprite):
     w_ab2 = pygame.transform.flip(w_ab, 1, 0)
     q_ab = pygame.image.load("data/water_q.png")
     q_ab2 = pygame.transform.flip(q_ab, 1, 0)
+
     def __init__(self, group):
         super().__init__(group)
         self.sheet = self.sheet1
@@ -524,7 +536,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.rect.move(224, 112)
 
     def cut_sheet(self, sheet, columns, rows):
-        self.rect = pygame.Rect(1100, 550, sheet.get_width() // columns, 
+        self.rect = pygame.Rect(1100, 550, sheet.get_width() // columns,
                                 sheet.get_height() // rows)
         for j in range(rows):
             for i in range(columns):
@@ -546,7 +558,7 @@ class Enemy(pygame.sprite.Sprite):
                 self.frames = []
                 self.cut_sheet(self.sheet, 8, 1)
                 self.rect = old
-            elif ass.rect.x <  self.rect.center[0]:
+            elif ass.rect.x < self.rect.center[0]:
                 self.sheet = self.sheet4_r
                 self.frames = []
                 self.cut_sheet(self.sheet, 8, 1)
@@ -565,7 +577,7 @@ class Enemy(pygame.sprite.Sprite):
                 self.frames = []
                 self.cut_sheet(self.sheet, 7, 1)
                 self.rect = old
-            elif ass.rect.center[0] <  self.rect.center[0]:
+            elif ass.rect.center[0] < self.rect.center[0]:
                 self.sheet = self.sheet3_r
                 self.frames = []
                 self.cut_sheet(self.sheet, 7, 1)
@@ -576,7 +588,7 @@ class Enemy(pygame.sprite.Sprite):
                 self.frames = []
                 self.cut_sheet(self.sheet, 32, 1)
                 self.rect = old
-            elif ass.rect.center[0] <  self.rect.center[0]:
+            elif ass.rect.center[0] < self.rect.center[0]:
                 self.sheet = self.r_ab2
                 self.frames = []
                 self.cut_sheet(self.sheet, 32, 1)
@@ -587,7 +599,7 @@ class Enemy(pygame.sprite.Sprite):
                 self.frames = []
                 self.cut_sheet(self.sheet, 27, 1)
                 self.rect = old
-            elif ass.rect.center[0] <  self.rect.center[0]:
+            elif ass.rect.center[0] < self.rect.center[0]:
                 self.sheet = self.w_ab2
                 self.frames = []
                 self.cut_sheet(self.sheet, 27, 1)
@@ -598,12 +610,12 @@ class Enemy(pygame.sprite.Sprite):
                 self.frames = []
                 self.cut_sheet(self.sheet, 21, 1)
                 self.rect = old
-            elif ass.rect.center[0] <  self.rect.center[0]:
+            elif ass.rect.center[0] < self.rect.center[0]:
                 self.sheet = self.q_ab2
                 self.frames = []
                 self.cut_sheet(self.sheet, 21, 1)
                 self.rect = old
-            
+
 
 class AnimatedSprite(pygame.sprite.Sprite):
     if hero_mega_val == 3:
@@ -658,6 +670,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         att = pygame.image.load("data/fire_att.png")
         att2 = pygame.transform.flip(att, 1, 0)
         hero_die_again = pygame.image.load("data/fire_die.png")
+
     def __init__(self, group):
         super().__init__(group)
         self.sheet = self.sheet1
@@ -666,9 +679,9 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.cur_frame = 0
         self.image = self.frames[self.cur_frame]
         self.rect = self.rect.move(224, 112)
-        
+
     def cut_sheet(self, sheet, columns, rows):
-        self.rect = pygame.Rect(-300, 550, sheet.get_width() // columns, 
+        self.rect = pygame.Rect(-300, 550, sheet.get_width() // columns,
                                 sheet.get_height() // rows)
         for j in range(rows):
             for i in range(columns):
@@ -685,7 +698,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     self.frames = []
                     self.cut_sheet(self.sheet, 8, 1)
                     self.rect = old
-                elif x1 <  self.rect.center[0]:
+                elif x1 < self.rect.center[0]:
                     self.sheet = self.att2
                     self.frames = []
                     self.cut_sheet(self.sheet, 8, 1)
@@ -696,7 +709,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     self.frames = []
                     self.cut_sheet(self.sheet, 8, 1)
                     self.rect = old
-                elif x1 <  self.rect.center[0]:
+                elif x1 < self.rect.center[0]:
                     self.sheet = self.q_ab2
                     self.frames = []
                     self.cut_sheet(self.sheet, 8, 1)
@@ -707,7 +720,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     self.frames = []
                     self.cut_sheet(self.sheet, 26, 1)
                     self.rect = old
-                elif x1 <  self.rect.center[0]:
+                elif x1 < self.rect.center[0]:
                     self.sheet = self.w_ab2
                     self.frames = []
                     self.cut_sheet(self.sheet, 26, 1)
@@ -718,7 +731,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     self.frames = []
                     self.cut_sheet(self.sheet, 30, 1)
                     self.rect = old
-                elif x1 <  self.rect.center[0]:
+                elif x1 < self.rect.center[0]:
                     self.sheet = self.r_ab2
                     self.frames = []
                     self.cut_sheet(self.sheet, 30, 1)
@@ -741,7 +754,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 self.frames = []
                 self.cut_sheet(self.sheet, 8, 1)
                 self.rect = old
-            elif x1 <  self.rect.center[0]:
+            elif x1 < self.rect.center[0]:
                 self.sheet = self.sheet2
                 self.frames = []
                 self.cut_sheet(self.sheet, 8, 1)
@@ -758,7 +771,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     self.frames = []
                     self.cut_sheet(self.sheet, 6, 1)
                     self.rect = old
-                elif x1 <  self.rect.center[0]:
+                elif x1 < self.rect.center[0]:
                     self.sheet = self.att2
                     self.frames = []
                     self.cut_sheet(self.sheet, 6, 1)
@@ -769,7 +782,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     self.frames = []
                     self.cut_sheet(self.sheet, 12, 1)
                     self.rect = old
-                elif x1 <  self.rect.center[0]:
+                elif x1 < self.rect.center[0]:
                     self.sheet = self.q_ab2
                     self.frames = []
                     self.cut_sheet(self.sheet, 12, 1)
@@ -780,7 +793,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     self.frames = []
                     self.cut_sheet(self.sheet, 24, 1)
                     self.rect = old
-                elif x1 <  self.rect.center[0]:
+                elif x1 < self.rect.center[0]:
                     self.sheet = self.w_ab2
                     self.frames = []
                     self.cut_sheet(self.sheet, 24, 1)
@@ -791,7 +804,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     self.frames = []
                     self.cut_sheet(self.sheet, 25, 1)
                     self.rect = old
-                elif x1 <  self.rect.center[0]:
+                elif x1 < self.rect.center[0]:
                     self.sheet = self.r_ab2
                     self.frames = []
                     self.cut_sheet(self.sheet, 25, 1)
@@ -814,7 +827,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 self.frames = []
                 self.cut_sheet(self.sheet, 8, 1)
                 self.rect = old
-            elif x1 <  self.rect.center[0]:
+            elif x1 < self.rect.center[0]:
                 self.sheet = self.sheet2
                 self.frames = []
                 self.cut_sheet(self.sheet, 8, 1)
@@ -831,7 +844,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     self.frames = []
                     self.cut_sheet(self.sheet, 7, 1)
                     self.rect = old
-                elif x1 <  self.rect.center[0]:
+                elif x1 < self.rect.center[0]:
                     self.sheet = self.att2
                     self.frames = []
                     self.cut_sheet(self.sheet, 7, 1)
@@ -842,7 +855,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     self.frames = []
                     self.cut_sheet(self.sheet, 21, 1)
                     self.rect = old
-                elif x1 <  self.rect.center[0]:
+                elif x1 < self.rect.center[0]:
                     self.sheet = self.q_ab2
                     self.frames = []
                     self.cut_sheet(self.sheet, 21, 1)
@@ -853,7 +866,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     self.frames = []
                     self.cut_sheet(self.sheet, 27, 1)
                     self.rect = old
-                elif x1 <  self.rect.center[0]:
+                elif x1 < self.rect.center[0]:
                     self.sheet = self.w_ab2
                     self.frames = []
                     self.cut_sheet(self.sheet, 27, 1)
@@ -864,7 +877,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     self.frames = []
                     self.cut_sheet(self.sheet, 32, 1)
                     self.rect = old
-                elif x1 <  self.rect.center[0]:
+                elif x1 < self.rect.center[0]:
                     self.sheet = self.r_ab2
                     self.frames = []
                     self.cut_sheet(self.sheet, 32, 1)
@@ -887,7 +900,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 self.frames = []
                 self.cut_sheet(self.sheet, 8, 1)
                 self.rect = old
-            elif x1 <  self.rect.center[0]:
+            elif x1 < self.rect.center[0]:
                 self.sheet = self.sheet2
                 self.frames = []
                 self.cut_sheet(self.sheet, 8, 1)
@@ -904,7 +917,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     self.frames = []
                     self.cut_sheet(self.sheet, 11, 1)
                     self.rect = old
-                elif x1 <  self.rect.center[0]:
+                elif x1 < self.rect.center[0]:
                     self.sheet = self.att2
                     self.frames = []
                     self.cut_sheet(self.sheet, 11, 1)
@@ -915,7 +928,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     self.frames = []
                     self.cut_sheet(self.sheet, 19, 1)
                     self.rect = old
-                elif x1 <  self.rect.center[0]:
+                elif x1 < self.rect.center[0]:
                     self.sheet = self.q_ab2
                     self.frames = []
                     self.cut_sheet(self.sheet, 19, 1)
@@ -926,7 +939,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     self.frames = []
                     self.cut_sheet(self.sheet, 28, 1)
                     self.rect = old
-                elif x1 <  self.rect.center[0]:
+                elif x1 < self.rect.center[0]:
                     self.sheet = self.w_ab2
                     self.frames = []
                     self.cut_sheet(self.sheet, 28, 1)
@@ -937,7 +950,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     self.frames = []
                     self.cut_sheet(self.sheet, 18, 1)
                     self.rect = old
-                elif x1 <  self.rect.center[0]:
+                elif x1 < self.rect.center[0]:
                     self.sheet = self.r_ab2
                     self.frames = []
                     self.cut_sheet(self.sheet, 18, 1)
@@ -960,7 +973,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 self.frames = []
                 self.cut_sheet(self.sheet, 8, 1)
                 self.rect = old
-            elif x1 <  self.rect.center[0]:
+            elif x1 < self.rect.center[0]:
                 self.sheet = self.sheet2
                 self.frames = []
                 self.cut_sheet(self.sheet, 8, 1)
@@ -970,16 +983,16 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 self.frames = []
                 self.cut_sheet(self.sheet, 8, 1)
                 self.rect = old
-            
 
 
 class Hp(pygame.sprite.Sprite):
     hp = pygame.image.load("data/hp.png").convert()
     hp1 = pygame.image.load("data/hp1.png").convert()
+
     def __init__(self, group, x, y):
         super().__init__(group)
         self.image = self.hp
-        self.rect = self.image.get_rect(x = x, y = y)
+        self.rect = self.image.get_rect(x=x, y=y)
 
     def update(self, x1=0, y1=0, val=1):
         global n, x_hp, xx
@@ -999,13 +1012,15 @@ class Hp(pygame.sprite.Sprite):
             self.rect.x += x1
             self.rect.y += y1
 
+
 class Hp_hero(pygame.sprite.Sprite):
     hp = pygame.image.load("data/hp.png").convert()
     hp1 = pygame.image.load("data/hp1.png").convert()
+
     def __init__(self, group, x, y):
         super().__init__(group)
         self.image = self.hp
-        self.rect = self.image.get_rect(x = x, y = y)
+        self.rect = self.image.get_rect(x=x, y=y)
 
     def update(self, x1=0, y1=0, val=1):
         global n_hero, x_hp_hero, xx_hero
@@ -1024,8 +1039,8 @@ class Hp_hero(pygame.sprite.Sprite):
         elif val == 3:
             self.rect.x += x1
             self.rect.y += y1
-  
-            
+
+
 camera = Camera()
 dragon = pygame.sprite.Group()
 Team_crip = pygame.sprite.Group()
@@ -1034,7 +1049,7 @@ Shells = pygame.sprite.Group()
 HP = pygame.sprite.Group()
 HP_HERO = pygame.sprite.Group()
 mapa = Map(dragon)
-ass =  AnimatedSprite(dragon)
+ass = AnimatedSprite(dragon)
 enemy = Enemy(dragon)
 tower_as = Tower(dragon, (300, 650))
 tower_enemy = Tower(dragon, (1100, 650))
@@ -1073,7 +1088,7 @@ crip_x = -300
 cripen_en_x = 1100
 pygame.display.update()
 clock = pygame.time.Clock()
-draw =False
+draw = False
 stay = True
 running = True
 cam = False
@@ -1265,7 +1280,7 @@ while running:
         dragon.draw(screen)
         pygame.display.update()
         clock.tick(60)
-    if y > 590 and 10 > x :
+    if y > 590 and 10 > x:
         camera.update(-3, 3)
         x1 += 3
         y1 -= 3
@@ -1393,11 +1408,9 @@ while running:
         else:
             draw = True
 
-
     if gg_hero == 1:
         draw = False
 
-    
     if draw:
         x = pygame.mouse.get_pos()[0]
         y = pygame.mouse.get_pos()[1]
@@ -1408,14 +1421,14 @@ while running:
                 ass.rect.x += 1
                 HP_HERO.update(1, 0, 3)
                 x_hp_hero += 1
-            elif x1 <  ass.rect.center[0]:
+            elif x1 < ass.rect.center[0]:
                 ass.rect.x -= 1
                 HP_HERO.update(-1, 0, 3)
                 x_hp_hero -= 1
-            if y1 >  ass.rect.center[1]:
+            if y1 > ass.rect.center[1]:
                 ass.rect.y += 1
                 HP_HERO.update(0, 1, 3)
-            elif y1 <  ass.rect.center[1]:
+            elif y1 < ass.rect.center[1]:
                 ass.rect.y -= 1
                 HP_HERO.update(0, -1, 3)
         else:
@@ -1455,7 +1468,7 @@ while running:
                 dragon.draw(screen)
                 pygame.display.update()
                 clock.tick(t)
-                count_q =  count_q + 1
+                count_q = count_q + 1
             else:
                 if not Die and count <= 10:
                     hp_now -= hero_attack_q
@@ -1470,7 +1483,7 @@ while running:
                 count_q = 0
                 tic_q = time.perf_counter()
         else:
-            
+
             stay = True
             Q = False
     if W:
@@ -1495,7 +1508,7 @@ while running:
                 stay = True
                 count_w = 0
                 tic_w = time.perf_counter()
-                
+
         else:
             W = False
             stay = True
@@ -1537,7 +1550,7 @@ while running:
             clock.tick(t)
             att_count += 1
         else:
-            attack =False
+            attack = False
             stay = True
             att_count = 0
             if not Die:
@@ -1565,7 +1578,6 @@ while running:
             enemy_attack = False
             hp_die = 1100
             hp_now = hp_die
-            
 
     if Die:
         if die != 8:
@@ -1585,8 +1597,9 @@ while running:
             kills += 1
             enemy_attack_check = False
             with sqlite3.connect('database.db') as con:
-                con.execute('UPDATE statistic SET kills = ?', (str(kills))).fetchall()
-            
+                con.execute('UPDATE statistic SET kills = ?',
+                            (str(kills))).fetchall()
+
     if not enemy_stay and gg == 1:
         if toc_dienemy - tic_dienemy >= 15:
             gg = 0
@@ -1599,8 +1612,7 @@ while running:
             else:
                 enemy_stay = True
             enemy_attack_check = True
-        
-            
+
     if enemy_stay and gg == 0:
         enemy.cur_frame = (enemy.cur_frame + 1) % len(enemy.frames)
         enemy.image = enemy.frames[enemy.cur_frame]
@@ -1628,7 +1640,7 @@ while running:
                 enemy_stay = True
                 enemy_run = False
             enemy_attack = False
-            
+
     if enemy_attack and gg == 0:
         if toc_enemy_r - tic_enemy_r >= 30 and gg_hero == 0:
             enemy_r = True
@@ -1675,10 +1687,9 @@ while running:
             attack = False
             hp_hero_die = 1100
             hp_hero_now = hp_hero_die
-    
+
     if toc_attenemy - tic_attenemy > 1 and gg == 0:
         enemy_attack_check = True
-        
 
     if enemy_run and gg == 0:
         enemy.cur_frame = (enemy.cur_frame + 1) % len(enemy.frames)
@@ -1689,14 +1700,14 @@ while running:
                 enemy.rect.x -= 1
                 HP.update(-1, 0, 3)
                 x_hp -= 1
-            elif enemy.rect.center[0] <  ass.rect.center[0]:
+            elif enemy.rect.center[0] < ass.rect.center[0]:
                 enemy.rect.x += 1
                 HP.update(1, 0, 3)
                 x_hp += 1
-            if enemy.rect.center[1] >  ass.rect.center[1]:
+            if enemy.rect.center[1] > ass.rect.center[1]:
                 enemy.rect.y -= 1
                 HP.update(0, -1, 3)
-            elif enemy.rect.center[1] <  ass.rect.center[1]:
+            elif enemy.rect.center[1] < ass.rect.center[1]:
                 enemy.rect.y += 1
                 HP.update(0, 1, 3)
         else:
@@ -1708,7 +1719,6 @@ while running:
         dragon.draw(screen)
         pygame.display.update()
         clock.tick(t)
-        
 
     if hero_die:
         if die_hero != 17:
@@ -1729,8 +1739,9 @@ while running:
             check_attack = False
             deaths += 1
             with sqlite3.connect('database.db') as con:
-                con.execute('UPDATE statistic SET deaths = ?', (str(deaths))).fetchall()
-            
+                con.execute('UPDATE statistic SET deaths = ?',
+                            (str(deaths))).fetchall()
+
     if not stay and gg_hero == 1:
         if toc_diehero - tic_diehero >= 15:
             gg_hero = 0
@@ -1803,7 +1814,6 @@ while running:
                 enemy_run = True
                 count_enemy_w = 0
                 tic_enemy_w = time.perf_counter()
-        
 
     if enemy_q and gg == 0:
         if toc_enemy_q - tic_enemy_q >= 4 and gg_hero == 0:
@@ -1834,19 +1844,19 @@ while running:
                 enemy_run = True
                 count_enemy_q = 0
                 tic_enemy_q = time.perf_counter()
-        
+
     Team_crip.update(1)
     screen.fill(0)
     dragon.draw(screen)
     pygame.display.update()
     clock.tick(t)
-    
+
     Enemy_crip.update(1)
     screen.fill(0)
     dragon.draw(screen)
     pygame.display.update()
     clock.tick(t)
-    
+
     if toc_res_crip - tic_res_crip >= 45:
         dragon.add(Crips(Team_crip, crip_x, crip_y))
         crip_x += 50
@@ -1885,7 +1895,7 @@ while running:
         all_en_crips_x.append(0)
         crip_en_x += 200
         tic_res_crip = time.perf_counter()
-    
+
     if tower_enemy.rect.center[0] - ass.rect.center[0] <= 100 and tower_enemy.rect.center[1] - ass.rect.center[1]:
         if toc_as_tower - tic_as_tower >= 6:
             dragon.add(Shell(Shells, (shell_en_x, shell_en_y)))
@@ -1899,7 +1909,8 @@ while running:
         win()
         wins += 1
         with sqlite3.connect('database.db') as con:
-            con.execute('UPDATE statistic SET wins = ?', (str(wins))).fetchall()
+            con.execute('UPDATE statistic SET wins = ?',
+                        (str(wins))).fetchall()
         running = False
     elif tower_en_hp <= 0:
         lose()
@@ -1910,9 +1921,9 @@ while running:
         clock.tick(t)
         losses += 1
         with sqlite3.connect('database.db') as con:
-            con.execute('UPDATE statistic SET losses = ?', (str(losses))).fetchall() 
+            con.execute('UPDATE statistic SET losses = ?',
+                        (str(losses))).fetchall()
         running = False
-
 
     toc_q = time.perf_counter()
     toc_w = time.perf_counter()
